@@ -113,11 +113,12 @@ class _InAppWebViewExampleScreenState extends State<InAppWebViewExampleScreen> {
               children: [
                 InAppWebView(
                   key: webViewKey,
-                  initialUrlRequest:
-                      URLRequest(url: WebUri('https://flutter.dev')),
+                  // initialUrlRequest:
+                  //     URLRequest(url: WebUri('https://flutter.dev')),
                   // initialUrlRequest:
                   // URLRequest(url: WebUri(Uri.base.toString().replaceFirst("/#/", "/") + 'page.html')),
                   // initialFile: "assets/index.html",
+                  initialFile: "assets/scroll-bug.html",
                   initialUserScripts: UnmodifiableListView<UserScript>([]),
                   initialSettings: settings,
                   // contextMenu: contextMenu,

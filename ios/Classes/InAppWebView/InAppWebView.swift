@@ -292,7 +292,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.contentOffset), options: [.new, .old], context: nil)
         scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.zoomScale), options: [.new, .old], context: nil)
         scrollView.addObserver(self, forKeyPath: #keyPath(UIScrollView.contentSize), options: [.new, .old], context: nil)
-        
+
         addObserver(self,
                     forKeyPath: #keyPath(WKWebView.estimatedProgress),
                     options: .new,
@@ -422,11 +422,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                     setMinimumViewportInset(minViewportInset, maximumViewportInset: maxViewportInset)
                 }
             }
-            
+
             if #available(iOS 16.0, *) {
                 isFindInteractionEnabled = settings.isFindInteractionEnabled
             }
-            
+
             // debugging is always enabled for iOS,
             // there isn't any option to set about it such as on Android.
             
@@ -661,9 +661,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             let oldContentOffset = change?[.oldKey] as? CGPoint
             let startedByUser = scrollView.isDragging || scrollView.isDecelerating
             if newContentOffset != oldContentOffset {
-                DispatchQueue.main.async {
-                    self.onScrollChanged(startedByUser: startedByUser, oldContentOffset: oldContentOffset)
-                }
+//                DispatchQueue.main.async {
+//                    self.onScrollChanged(startedByUser: startedByUser, oldContentOffset: oldContentOffset)
+//                }
             }
         } else if keyPath == #keyPath(UIScrollView.contentSize) {
             if let newContentSize = change?[.newKey] as? CGSize,
@@ -1214,13 +1214,13 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                 setMinimumViewportInset(minViewportInset, maximumViewportInset: maxViewportInset)
             }
         }
-        
+
         if #available(iOS 16.0, *) {
             if newSettingsMap["isFindInteractionEnabled"] != nil, settings?.isFindInteractionEnabled != newSettings.isFindInteractionEnabled {
                 isFindInteractionEnabled = newSettings.isFindInteractionEnabled
             }
         }
-        
+
         scrollView.isScrollEnabled = !(newSettings.disableVerticalScroll && newSettings.disableHorizontalScroll)
         
         self.settings = newSettings
@@ -2032,7 +2032,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
                             do {
                                 path = try Util.getAbsPathAsset(assetFilePath: certificatePath)
                             } catch {}
-                            
+
                             if let PKCS12Data = NSData(contentsOfFile: path),
                                let identityAndTrust: IdentityAndTrust = self.extractIdentity(PKCS12Data: PKCS12Data, password: certificatePassword) {
                                 let urlCredential: URLCredential = URLCredential(
@@ -2145,7 +2145,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         }
         
         var completionHandlerCalled = false
-        
+
         let callback = WebViewChannelDelegate.JsAlertCallback()
         callback.nonNullSuccess = { (response: JsAlertResponse) in
             if response.handledByClient {
@@ -2211,7 +2211,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo,
                  completionHandler: @escaping (Bool) -> Void) {
         var completionHandlerCalled = false
-        
+
         let callback = WebViewChannelDelegate.JsConfirmCallback()
         callback.nonNullSuccess = { (response: JsConfirmResponse) in
             if response.handledByClient {
@@ -2290,9 +2290,9 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     
     public func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt message: String, defaultText defaultValue: String?, initiatedByFrame frame: WKFrameInfo,
                  completionHandler: @escaping (String?) -> Void) {
-        
+
         var completionHandlerCalled = false
-        
+
         let callback = WebViewChannelDelegate.JsPromptCallback()
         callback.nonNullSuccess = { (response: JsPromptResponse) in
             if response.handledByClient {
@@ -2337,7 +2337,11 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
             callback.defaultBehaviour(nil)
         }
     }
-    
+
+    public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        scrollView.contentOffset = CGPoint(x: 0, y: 0)
+    }
+
     /// UIScrollViewDelegate is somehow bugged:
     /// if InAppWebView implements the UIScrollViewDelegate protocol and implement the scrollViewDidScroll event,
     /// then, when the user scrolls the content, the webview content is not rendered (just white space).
@@ -2346,7 +2350,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
     /// So, to track the same event, without implementing the scrollViewDidScroll event, we create
     /// an observer that observes the scrollView.contentOffset property.
     /// This way, we don't need to call setNeedsLayout() and all works fine.
-    public func onScrollChanged(startedByUser: Bool, oldContentOffset: CGPoint?) {
+    func onScrollChanged(startedByUser: Bool, oldContentOffset: CGPoint?) {
         let disableVerticalScroll = settings?.disableVerticalScroll ?? false
         let disableHorizontalScroll = settings?.disableHorizontalScroll ?? false
         if startedByUser {
@@ -2389,7 +2393,7 @@ public class InAppWebView: WKWebView, UIScrollViewDelegate, WKUIDelegate,
         channelDelegate?.onContentSizeChanged(oldContentSize: oldContentSize,
                                               newContentSize: scrollView.contentSize)
     }
-    
+
     public func scrollViewDidZoom(_ scrollView: UIScrollView) {
         let newScale = Float(scrollView.zoomScale)
         if newScale != oldZoomScale {
@@ -2815,7 +2819,7 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
             }
         }
     }
-    
+
     public func scrollTo(x: Int, y: Int, animated: Bool) {
         scrollView.setContentOffset(CGPoint(x: x, y: y), animated: animated)
     }
@@ -2927,7 +2931,7 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
     public func getContentWidth() -> Int64 {
         return Int64(scrollView.contentSize.width)
     }
-    
+
     public func zoomBy(zoomFactor: Float, animated: Bool) {
         let currentZoomScale = scrollView.zoomScale
         scrollView.setZoomScale(currentZoomScale * CGFloat(zoomFactor), animated: animated)
@@ -3051,7 +3055,7 @@ if(window.\(JAVASCRIPT_BRIDGE_NAME)[\(_callHandlerID)] != null) {
             return pullToRefreshControl?.superview != nil
         }
     }
-    
+
     public func createWebMessageChannel(completionHandler: ((WebMessageChannel) -> Void)? = nil) -> WebMessageChannel {
         let id = NSUUID().uuidString
         let webMessageChannel = WebMessageChannel(id: id)
